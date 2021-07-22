@@ -4,11 +4,12 @@ declare(strict_types=1);
 namespace think\addons;
 
 use think\Route;
+use think\Request;
 use think\helper\Str;
-use think\facade\Config;
 use think\facade\Lang;
 use think\facade\Cache;
 use think\facade\Event;
+use think\facade\Config;
 use think\addons\middleware\Addons;
 
 /**
@@ -41,7 +42,7 @@ class Service extends \think\Service
     {
         $this->registerRoutes(function (Route $route) {
             // 路由脚本
-            $execute = '\\think\\addons\\Route@execute';
+            $execute = '\\think\\addons\\Route::execute';
 
             // 注册插件公共中间件
             if (is_file($this->app->addons->getAddonsPath() . 'middleware.php')) {
@@ -49,7 +50,13 @@ class Service extends \think\Service
             }
 
             // 注册控制器路由
-            $route->rule("addons/:addon/:controller/:action$", $execute)->middleware(Addons::class);
+            $route->rule("/:load/addons/:addon/[:controller]/[:action]", function(Request $request) {
+                return \think\addons\Route::execute($request->param('addon'), $request->param('controller'), $request->param('action'));
+            })->middleware(Addons::class)->allowCrossDomain([
+                'Access-Control-Allow-Origin'        => '*',
+                'Access-Control-Allow-Credentials'   => 'true',
+            ]);
+            // $route->rule("addons/:addon/[:controller]/[:action]", $execute)->middleware(Addons::class);
             // 自定义路由
             $routes = (array) Config::get('addons.route', []);
             foreach ($routes as $key => $val) {

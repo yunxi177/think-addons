@@ -31,16 +31,15 @@ class Route
 {
     /**
      * 插件路由请求
+     * @param null $addon
+     * @param null $controller
+     * @param null $action
      * @return mixed
      */
-    public static function execute()
+    public static function execute($addon = null, $controller = null, $action = null)
     {
         $app = app();
         $request = $app->request;
-
-        $addon = $request->route('addon');
-        $controller = $request->route('controller');
-        $action = $request->route('action');
 
         Event::trigger('addons_begin', $request);
 
